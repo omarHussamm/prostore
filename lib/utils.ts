@@ -15,3 +15,18 @@ export function formatNumberWithDecimal(num: number): string {
   const [intValue, decimalValue] = num.toString().split(".");
   return decimalValue ? `${intValue}.${decimalValue.padEnd(2, "0")}` : `${intValue}.00`;
 }
+
+// Format errors
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function formatError(error: any) {
+  if(error.name === "ZodError"){
+    const fieldErrors = Object.keys(error.errors).map((key) => error.errors[key].message);
+    return fieldErrors.join(". ");
+
+  }else if(error.name === "PrismaClientKnownRequestError" && error.code === "P2002"){
+    const field : string = error.meta?.target ? error.meta.target[0] : "Field";
+    return `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
+  }else{
+    return typeof error.message === "string" ? error.message : JSON.stringify(error.message);
+  }
+}
